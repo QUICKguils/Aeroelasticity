@@ -1,3 +1,14 @@
+# Output directory (plots, solutions, etc.)
+out/
+
+# Huge resource directory (MAT files)
+res/
+
+# Personnal draft files
+draft.py
+
+# =====================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
