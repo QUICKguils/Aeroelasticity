@@ -71,7 +71,7 @@ def plot_time_acceleration(id):
 class ExtractedSignal(NamedTuple):
     pitch: np.ndarray
     plunge: np.ndarray
-    t_sample: np.ndarray
+    var_sample: np.ndarray
 
 
 # Manully identify the relevant portions of the acceleration signals.
@@ -89,7 +89,7 @@ EXTRACT_BOUNDS = np.array([
 ])
 
 
-def extract_accelerations(extract_bounds):
+def extract_signals(extract_bounds):
     """Extract relevant signal portions, based on manual identification."""
     extracted_signals = np.zeros(
         (extract_bounds.shape[0], extract_bounds.shape[1]),
@@ -97,11 +97,11 @@ def extract_accelerations(extract_bounds):
     )
 
     for id_run, bounds in enumerate(extract_bounds):
-        (pitch, plunge, airspeed, _) = ld.get_run(id_run)
+        (pitch, plunge, airspeed, _) = get_run(id_run)
 
         for id_bound, bound in enumerate(bounds):
-            ti = bound[0]*ld.SAMPLING_TSTEP
-            tf = bound[1]*ld.SAMPLING_TSTEP
+            ti = bound[0]*SAMPLING_TSTEP
+            tf = bound[1]*SAMPLING_TSTEP
             n_sample = np.abs(bound[1] - bound[0]) + 1
             t_portion = np.linspace(ti, tf, n_sample)
             pitch_portion = pitch[bound[0]:bound[1]+1]
