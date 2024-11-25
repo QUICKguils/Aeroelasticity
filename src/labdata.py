@@ -71,7 +71,7 @@ def plot_time_acceleration(id):
 class ExtractedSignal(NamedTuple):
     pitch: np.ndarray
     plunge: np.ndarray
-    var_sample: np.ndarray
+    var: np.ndarray
 
 
 # Manully identify the relevant portions of the acceleration signals.
