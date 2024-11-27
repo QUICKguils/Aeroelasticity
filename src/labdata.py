@@ -19,9 +19,9 @@ SAMPLING_FREQ_HZ = 201.03
 SAMPLING_TSTEP = 1/SAMPLING_FREQ_HZ
 
 
-def get_run(id):
+def get_run(id_run):
     """Extract lab data for the desired airspeed run."""
-    run = LAB_DATA[id]
+    run = LAB_DATA[id_run]
     pitch = run[0].flatten()
     plunge = run[1].flatten()
     airspeed = run[2].flatten()[0]
@@ -48,9 +48,9 @@ def plot_raw_acceleration(id):
     fig.show()
 
 
-def plot_time_acceleration(id):
+def plot_time_acceleration(id_run):
     """Plot the time vs accelerations for the desired airspeed run."""
-    (pitch, plunge, airspeed, n_sample) = get_run(id)
+    (pitch, plunge, airspeed, n_sample) = get_run(id_run)
     t_sample = np.linspace(0, n_sample*SAMPLING_TSTEP, n_sample)
 
     fig = plt.figure()
@@ -69,6 +69,9 @@ def plot_time_acceleration(id):
 
 
 class ExtractedSignal(NamedTuple):
+    id: int
+    id_run: int
+    airspeed: float
     pitch: np.ndarray
     plunge: np.ndarray
     var: np.ndarray
@@ -103,6 +106,36 @@ def extract_signals(extract_bounds):
             t_portion = np.linspace(ti, tf, n_sample)
             pitch_portion = pitch[bound[0]:bound[1]+1]
             plunge_portion = plunge[bound[0]:bound[1]+1]
-            extracted_signals[id_run][id_bound] = ExtractedSignal(pitch_portion, plunge_portion, t_portion)
+            extracted_signals[id_run][id_bound] = ExtractedSignal(
+                id       = id_bound,
+                id_run   = id_run,
+                airspeed = airspeed,
+                pitch    = pitch_portion,
+                plunge   = plunge_portion,
+                var      = t_portion
+            )
 
     return extracted_signals
+
+
+def _plot_extracted_signals():
+    """Plot the extracted signals for each run, to check their validity."""
+    for signal_run in extract_signals(EXTRACT_BOUNDS):
+        fig = plt.figure()
+        fig.suptitle((
+            "Extracted signals"
+            f" (run: {signal_run[0].id_run}"
+            f" -- airspeed: {signal_run[0].airspeed} m/s)"
+        ))
+        fig.supxlabel("Time (s)")
+        fig.supylabel("Acceleration (m/s²)")
+        gs = fig.add_gridspec(2, 1, hspace=0.3)
+        (ax_pitch, ax_plunge) = gs.subplots()
+        ax_pitch.set_title("Pitch")
+        ax_plunge.set_title("Plunge")
+
+        for signal in signal_run:
+            ax_pitch.plot(signal.var, signal.pitch)
+            ax_plunge.plot(signal.var, signal.plunge)
+
+        plt.show()
