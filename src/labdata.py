@@ -79,7 +79,7 @@ class ExtractedSignal(NamedTuple):
 # for each run/airspeed.
 EXTRACT_BOUNDS = np.array([
     [[1650,  2000],  [2975,  3300],  [4185,  4500]],
-    [[3523,  3900],  [4828,  4900],  [5633,  5900]],
+    [[3523,  3900],  [4626,  4850],  [5633,  5900]],
     [[3737,  4000],  [4717,  5000],  [5538,  5800]],
     [[3322,  3600],  [4050,  4300],  [4687,  5000]],
     [[4457,  4800],  [6143,  6500],  [8239,  8600]],
@@ -91,10 +91,7 @@ EXTRACT_BOUNDS = np.array([
 
 def extract_signals(extract_bounds):
     """Extract relevant signal portions, based on manual identification."""
-    extracted_signals = np.zeros(
-        (extract_bounds.shape[0], extract_bounds.shape[1]),
-        dtype=ExtractedSignal
-    )
+    extracted_signals = np.zeros(extract_bounds.shape[:2], dtype=ExtractedSignal)
 
     for id_run, bounds in enumerate(extract_bounds):
         (pitch, plunge, airspeed, _) = get_run(id_run)
