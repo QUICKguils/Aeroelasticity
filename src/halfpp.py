@@ -67,5 +67,6 @@ def plot_half_power(res: HPPresult):
 extracted_signals = ld.extract_signals(ld.EXTRACT_BOUNDS)
 fft_signals = compute_fft_signals(extracted_signals)
 signal = fft_signals[5][2]
+print(signal)
 hpp_res = compute_damping_half_power(signal.pitch, signal.var)
 plot_half_power(hpp_res)
