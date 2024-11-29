@@ -5,7 +5,7 @@ from typing import NamedTuple
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft, fftshift, fftfreq
-from scipy.signal import find_peaks, peak_widths
+from scipy.signal import peak_widths
 
 import labdata as ld
 
@@ -48,7 +48,7 @@ def half_power_point_method(fft_sample: np.ndarray, freq_sample: np.ndarray) -> 
 
     # fn_idx, _ = find_peaks(fft_sample, prominence=200)
     # halfpeaks_pitch = peak_widths(fft_sample, fn_idx, rel_height=1/np.sqrt(2))
-    # TODO: maybe more robust with max
+    # NOTE: this is more robust with np.argmax
     fn_idx = np.argmax(fft_sample)
     halfpeaks_pitch = peak_widths(fft_sample, [fn_idx], rel_height=1/np.sqrt(2))
     fn = freq_sample[fn_idx]
