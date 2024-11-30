@@ -11,7 +11,7 @@ plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['STIX Two Text'] + plt.rcParams['font.serif']
 plt.rcParams['font.size'] = 10
-plt.rcParams['figure.dpi'] = 200
+plt.rcParams['figure.dpi'] = 150
 
 ROOT_DIR = pathlib.Path(__file__).parent.parent
 FPATH_DATA = ROOT_DIR / "res" / "DATAG2_v7"
@@ -40,10 +40,10 @@ def plot_raw_acceleration(id_run, *, publish=False) -> None:
     if not(publish):
         fig.suptitle(f"Response to an external impulsion ($U_\\infty$ = {airspeed} m/s)")
 
-    ax_pitch.plot(pitch)
+    ax_pitch.plot(pitch, linewidth=0.5)
     ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
 
-    ax_plunge.plot(plunge)
+    ax_plunge.plot(plunge, linewidth=0.5)
     ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
     ax_plunge.set_xlabel("Sample index")
 
@@ -59,10 +59,10 @@ def plot_time_acceleration(id_run, *, publish=False) -> None:
     if not(publish):
         fig.suptitle(f"Response to an external impulsion ($U_\\infty$ = {airspeed} m/s)")
 
-    ax_pitch.plot(t_sample, pitch)
+    ax_pitch.plot(t_sample, pitch, linewidth=0.5)
     ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
 
-    ax_plunge.plot(t_sample, plunge)
+    ax_plunge.plot(t_sample, plunge, linewidth=0.5)
     ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
     ax_plunge.set_xlabel("Record time (s)")
 
@@ -88,8 +88,8 @@ EXTRACT_BOUNDS = np.array([
     [[3737,  4000],  [4717,  5000],  [5538,  5800]],
     [[3322,  3600],  [4050,  4300],  [4687,  5000]],
     [[4457,  4800],  [6143,  6500],  [8239,  8600]],
-    [[11200, 11700], [13640, 14100], [14370, 14500]],
-    [[2600,  4800],  [5394,  7000],  [7667,  9250]],
+    [[11200, 11700], [13640, 14100], [14370, 14974]],
+    [[2600,  4800],  [5394,  7000],  [7667,  9396]],
     [[3000,  3600],  [3000,  3600],  [3000,  3600]],
 ])
 
@@ -122,7 +122,7 @@ def get_extracted_signals(extract_bounds):
 
 def plot_extracted_signals(signal: ExtractedSignal, *, publish=False) -> None:
     """Plot an extracted signal as a function of its record time."""
-    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 3.5), layout="constrained")
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 5.5), layout="constrained")
     if not(publish):
         fig.suptitle((
             "Extracted signals "
