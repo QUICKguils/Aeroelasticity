@@ -97,7 +97,7 @@ def get_hppm_signals(fft_signals):
 
 def plot_half_power(hppm_signal: HppmSignal, *, publish=False) -> None:
     """Plot the amplitude FFT of accelerations with its HPPM computed quantities."""
-    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 4), layout="constrained")
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 5.5), layout="constrained")
     if not(publish):
         fig.suptitle((
             "Half-power point method"
@@ -154,24 +154,24 @@ def mean_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge):
 
 def plot_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge, *, publish=False) -> None:
     airspeedsm, fpitchm, dpitchm, fplungem, dplungem = mean_freq_damp(
-        airspeeds, freq_pitch, damp_pitch, freq_pitch, damp_plunge
+        airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge
     )
 
     fig, (ax_freq, ax_damp) = plt.subplots(2, 1, figsize=(5.5, 5), layout="constrained")
     if not(publish):
         fig.suptitle(("Half-power point method"))
 
-    ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="pitch")
-    ax_freq.plot(airspeedsm, fpitchm)
-    ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="plunge")
-    ax_freq.plot(airspeedsm, fplungem)
+    ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="pitch", linewidths=1)
+    ax_freq.plot(airspeedsm, fpitchm, linewidth=1)
+    ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="plunge", linewidths=1)
+    ax_freq.plot(airspeedsm, fplungem, linewidth=1)
     ax_freq.set_ylabel(r"$\omega_{\mathrm{n}}/\mathrm{Hz}$")
     ax_freq.legend()
 
-    ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="pitch")
-    ax_damp.plot(airspeedsm, dpitchm)
-    ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="plunge")
-    ax_damp.plot(airspeedsm, dplungem)
+    ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="pitch", linewidths=1)
+    ax_damp.plot(airspeedsm, dpitchm, linewidth=1)
+    ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="plunge", linewidths=1)
+    ax_damp.plot(airspeedsm, dplungem, linewidth=1)
     ax_damp.set_ylabel(r"$\zeta$")
     ax_damp.set_xlabel(r"$U_\infty/(\mathrm{m/s})$")
 
@@ -183,4 +183,3 @@ if __name__ == '__main__':
     fft_signals = get_fft_signals(extracted_signals)
     hppm_signals = get_hppm_signals(fft_signals)
     freq_damp = extract_freq_damp(hppm_signals)
-    plot_freq_damp(*freq_damp)
