@@ -7,12 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import io
 
-# plt.rcParams['text.usetex'] = True
 plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['STIX Two Text'] + plt.rcParams['font.serif']
-# plt.rcParams['figure.figsize'] = (6.34, 3.34)
-plt.rcParams['font.size'] = 11
+plt.rcParams['font.size'] = 10
 plt.rcParams['figure.dpi'] = 200
 
 ROOT_DIR = pathlib.Path(__file__).parent.parent
@@ -34,40 +32,39 @@ def get_run(id_run):
     return (pitch, plunge, airspeed, n_sample)
 
 
-def plot_raw_acceleration(id_run):
+def plot_raw_acceleration(id_run, *, publish=False) -> None:
     """Plot the raw accelerometer data for the desired airspeed run."""
     (pitch, plunge, airspeed, _) = get_run(id_run)
 
-    fig = plt.figure()
-    fig.supxlabel("Array index")
-    fig.supylabel("Acceleration (m/s²)")
-    gs = fig.add_gridspec(2, 1, hspace=0.3)
-    (ax_pitch, ax_plunge) = gs.subplots()
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 3.5), layout="constrained")
+    if not(publish):
+        fig.suptitle(f"Response to an external impulsion ($U_\\infty$ = {airspeed} m/s)")
 
     ax_pitch.plot(pitch)
-    ax_pitch.set_title("Pitch")
+    ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
+
     ax_plunge.plot(plunge)
-    ax_plunge.set_title("Plunge")
+    ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
+    ax_plunge.set_xlabel("Sample index")
 
     fig.show()
 
 
-def plot_time_acceleration(id_run):
+def plot_time_acceleration(id_run, *, publish=False) -> None:
     """Plot the time vs accelerations for the desired airspeed run."""
     (pitch, plunge, airspeed, n_sample) = get_run(id_run)
     t_sample = np.linspace(0, n_sample*SAMPLING_TSTEP, n_sample)
 
-    fig = plt.figure()
-    fig.suptitle(f"Response to an external impulsion ($U_\\infty$ = {airspeed} m/s)")
-    fig.supxlabel("Time (s)")
-    fig.supylabel("Acceleration (m/s²)")
-    gs = fig.add_gridspec(2, 1, hspace=0.3)
-    (ax_pitch, ax_plunge) = gs.subplots()
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 3.5), layout="constrained")
+    if not(publish):
+        fig.suptitle(f"Response to an external impulsion ($U_\\infty$ = {airspeed} m/s)")
 
     ax_pitch.plot(t_sample, pitch)
-    ax_pitch.set_title("Pitch")
+    ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
+
     ax_plunge.plot(t_sample, plunge)
-    ax_plunge.set_title("Plunge")
+    ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
+    ax_plunge.set_xlabel("Record time (s)")
 
     fig.show()
 
@@ -123,21 +120,38 @@ def get_extracted_signals(extract_bounds):
     return extracted_signals
 
 
-def _plot_extracted_signals():
+def plot_extracted_signals(signal: ExtractedSignal, *, publish=False) -> None:
+    """Plot an extracted signal as a function of its record time."""
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 3.5), layout="constrained")
+    if not(publish):
+        fig.suptitle((
+            "Extracted signals "
+            f"(run: {signal.id_run}, "
+            f"-- airspeed: {signal.airspeed} m/s)"
+        ))
+
+    ax_pitch.plot(signal.var, signal.pitch)
+    ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
+
+    ax_plunge.plot(signal.var, signal.plunge)
+    ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
+    ax_plunge.set_xlabel("Record time (s)")
+
+    plt.show()
+
+
+def _check_extracted_signals() -> None:
     """Plot the extracted signals for each run, to check their validity."""
     for signal_run in get_extracted_signals(EXTRACT_BOUNDS):
-        fig = plt.figure()
+        fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 3.5), layout="constrained")
         fig.suptitle((
-            "Extracted signals"
-            f" (run: {signal_run[0].id_run}"
-            f" -- airspeed: {signal_run[0].airspeed} m/s)"
+            "Extracted signals "
+            f"(run: {signal_run[0].id_run}, "
+            f"-- airspeed: {signal_run[0].airspeed} m/s)"
         ))
-        fig.supxlabel("Time (s)")
-        fig.supylabel("Acceleration (m/s²)")
-        gs = fig.add_gridspec(2, 1, hspace=0.3)
-        (ax_pitch, ax_plunge) = gs.subplots()
-        ax_pitch.set_title("Pitch")
-        ax_plunge.set_title("Plunge")
+        ax_pitch.set_ylabel(r"$\ddot{\alpha}$/(rad/s²)")
+        ax_plunge.set_ylabel(r"$\ddot{h}$/(m/s²)")
+        ax_plunge.set_xlabel("Sample index")
 
         for signal in signal_run:
             ax_pitch.plot(signal.var, signal.pitch)

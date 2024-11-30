@@ -95,28 +95,26 @@ def get_hppm_signals(fft_signals):
     return hppm_signals
 
 
-def plot_half_power(hppm_signal: HppmSignal, fig=None):
+def plot_half_power(hppm_signal: HppmSignal, *, publish=False) -> None:
     """Plot the amplitude FFT of accelerations with its HPPM computed quantities."""
-
-    fig = plt.figure()
-    fig.suptitle((
-        "Half-power point method"
-        f" (run: {hppm_signal.fft.id_run}"
-        f" -- airspeed: {hppm_signal.fft.airspeed} m/s)"
-    ))
-    fig.supxlabel("Frequency (Hz)")
-    fig.supylabel("Acceleration FFT amplitude")
-    gs = fig.add_gridspec(2, 1, hspace=0.3)
-    (ax_pitch, ax_plunge) = gs.subplots()
+    fig, (ax_pitch, ax_plunge) = plt.subplots(2, 1, figsize=(5.5, 4), layout="constrained")
+    if not(publish):
+        fig.suptitle((
+            "Half-power point method"
+            f" (run: {hppm_signal.fft.id_run}"
+            f" -- airspeed: {hppm_signal.fft.airspeed} m/s)"
+        ))
 
     ax_pitch.plot(hppm_signal.fft.var, hppm_signal.fft.pitch)
     ax_pitch.plot(hppm_signal.pitch.fn, hppm_signal.fft.pitch[hppm_signal.pitch.fn_idx], 'x')
     ax_pitch.hlines(hppm_signal.pitch.half_power, hppm_signal.pitch.f1, hppm_signal.pitch.f2, colors='C2')
-    ax_pitch.set_title("Pitch")
+    ax_pitch.set_ylabel(r"$\|\mathrm{FFT}(\ddot{\alpha})\|$/(rad/s²)")
+
     ax_plunge.plot(hppm_signal.fft.var, hppm_signal.fft.plunge)
     ax_plunge.plot(hppm_signal.plunge.fn, hppm_signal.fft.plunge[hppm_signal.plunge.fn_idx], 'x')
     ax_plunge.hlines(hppm_signal.plunge.half_power, hppm_signal.plunge.f1, hppm_signal.plunge.f2, colors='C2')
-    ax_plunge.set_title("Plunge")
+    ax_plunge.set_ylabel(r"$\|\mathrm{FFT}(\ddot{h})\|$/(m/s²)")
+    ax_plunge.set_xlabel("Signal frequency (Hz)")
 
     fig.show()
 
@@ -139,23 +137,21 @@ def extract_freq_damp(hppm_signals):
     return (airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge)
 
 
-def plot_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge):
-    fig = plt.figure()
-    fig.suptitle(("Half-power point method"))
-    fig.supxlabel("Wind tunnel speed (m/s)")
-
-    gs = fig.add_gridspec(2, 1, hspace=0.2)
-    (ax_freq, ax_damp) = gs.subplots()
-    ax_freq.set_ylabel("Frequencies (Hz)")
-    ax_damp.set_ylabel("Dampings")
+def plot_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge, *, publish=False) -> None:
+    fig, (ax_freq, ax_damp) = plt.subplots(2, 1, figsize=(5.5, 5), layout="constrained")
+    if not(publish):
+        fig.suptitle(("Half-power point method"))
 
     ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="Pitch")
     ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="Plunge")
+    ax_freq.set_ylabel(r"$\omega_{\mathrm{n}}/\mathrm{Hz}$")
+    ax_freq.legend()
 
     ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="Pitch")
     ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="Plunge")
+    ax_damp.set_ylabel(r"$\zeta$")
+    ax_damp.set_xlabel(r"$U_\infty/(\mathrm{m/s})$")
 
-    ax_freq.legend()
     fig.show()
 
 
@@ -163,4 +159,4 @@ if __name__ == '__main__':
     extracted_signals = ld.get_extracted_signals(ld.EXTRACT_BOUNDS)
     fft_signals = get_fft_signals(extracted_signals)
     hppm_signals = get_hppm_signals(fft_signals)
-    plot_freq_damp(*extract_freq_damp(hppm_signals))
+    plot_freq_damp(*extract_freq_damp(hppm_signals), publish=True)
