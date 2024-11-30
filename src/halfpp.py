@@ -137,18 +137,41 @@ def extract_freq_damp(hppm_signals):
     return (airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge)
 
 
+def mean_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge):
+    """Just compute the mean of the frequencies and dampings, for each run."""
+    airspeeds_mean   = np.mean(airspeeds,   axis=1)
+    freq_pitch_mean  = np.mean(freq_pitch,  axis=1)
+    damp_pitch_mean  = np.mean(damp_pitch,  axis=1)
+    freq_plunge_mean = np.mean(freq_plunge, axis=1)
+    damp_plunge_mean = np.mean(damp_plunge, axis=1)
+
+    return(
+        airspeeds_mean,
+        freq_pitch_mean, damp_pitch_mean,
+        freq_plunge_mean, damp_plunge_mean,
+    )
+
+
 def plot_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge, *, publish=False) -> None:
+    airspeedsm, fpitchm, dpitchm, fplungem, dplungem = mean_freq_damp(
+        airspeeds, freq_pitch, damp_pitch, freq_pitch, damp_plunge
+    )
+
     fig, (ax_freq, ax_damp) = plt.subplots(2, 1, figsize=(5.5, 5), layout="constrained")
     if not(publish):
         fig.suptitle(("Half-power point method"))
 
-    ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="Pitch")
-    ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="Plunge")
+    ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="pitch")
+    ax_freq.plot(airspeedsm, fpitchm)
+    ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="plunge")
+    ax_freq.plot(airspeedsm, fplungem)
     ax_freq.set_ylabel(r"$\omega_{\mathrm{n}}/\mathrm{Hz}$")
     ax_freq.legend()
 
-    ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="Pitch")
-    ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="Plunge")
+    ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="pitch")
+    ax_damp.plot(airspeedsm, dpitchm)
+    ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="plunge")
+    ax_damp.plot(airspeedsm, dplungem)
     ax_damp.set_ylabel(r"$\zeta$")
     ax_damp.set_xlabel(r"$U_\infty/(\mathrm{m/s})$")
 
@@ -159,4 +182,5 @@ if __name__ == '__main__':
     extracted_signals = ld.get_extracted_signals(ld.EXTRACT_BOUNDS)
     fft_signals = get_fft_signals(extracted_signals)
     hppm_signals = get_hppm_signals(fft_signals)
-    plot_freq_damp(*extract_freq_damp(hppm_signals), publish=True)
+    freq_damp = extract_freq_damp(hppm_signals)
+    plot_freq_damp(*freq_damp)
