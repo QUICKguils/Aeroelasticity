@@ -73,12 +73,13 @@ def plot_time_acceleration(id_run):
 
 
 class ExtractedSignal(NamedTuple):
-    id: int
-    id_run: int
-    airspeed: float
-    pitch: np.ndarray
-    plunge: np.ndarray
-    var: np.ndarray
+    """Represent a signal extracted from the lab data."""
+    id: int             # Label of the signal, in its run
+    id_run: int         # Label of the run
+    airspeed: float     # Airspeed of the run
+    pitch: np.ndarray   # pitch data
+    plunge: np.ndarray  # plunge data
+    var: np.ndarray     # Abscissa of the pitch and plunge signals
 
 
 # Manully identify the relevant portions of the acceleration signals.
@@ -96,23 +97,23 @@ EXTRACT_BOUNDS = np.array([
 ])
 
 
-def extract_signals(extract_bounds):
+def get_extracted_signals(extract_bounds):
     """Extract relevant signal portions, based on manual identification."""
     extracted_signals = np.zeros(extract_bounds.shape[:2], dtype=ExtractedSignal)
 
-    for id_run, bounds in enumerate(extract_bounds):
-        (pitch, plunge, airspeed, _) = get_run(id_run)
+    for i_run, bounds in enumerate(extract_bounds):
+        (pitch, plunge, airspeed, _) = get_run(i_run)
 
-        for id_bound, bound in enumerate(bounds):
+        for i_bound, bound in enumerate(bounds):
             ti = bound[0]*SAMPLING_TSTEP
             tf = bound[1]*SAMPLING_TSTEP
             n_sample = np.abs(bound[1] - bound[0]) + 1
             t_portion = np.linspace(ti, tf, n_sample)
             pitch_portion = pitch[bound[0]:bound[1]+1]
             plunge_portion = plunge[bound[0]:bound[1]+1]
-            extracted_signals[id_run][id_bound] = ExtractedSignal(
-                id       = id_bound,
-                id_run   = id_run,
+            extracted_signals[i_run][i_bound] = ExtractedSignal(
+                id       = i_bound,
+                id_run   = i_run,
                 airspeed = airspeed,
                 pitch    = pitch_portion,
                 plunge   = plunge_portion,
@@ -124,7 +125,7 @@ def extract_signals(extract_bounds):
 
 def _plot_extracted_signals():
     """Plot the extracted signals for each run, to check their validity."""
-    for signal_run in extract_signals(EXTRACT_BOUNDS):
+    for signal_run in get_extracted_signals(EXTRACT_BOUNDS):
         fig = plt.figure()
         fig.suptitle((
             "Extracted signals"

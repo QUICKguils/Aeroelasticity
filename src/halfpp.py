@@ -10,31 +10,32 @@ from scipy.signal import peak_widths
 import labdata as ld
 
 
-def compute_fft_signals(extracted_signals):
-    """Extract relevant signal portions, based on manual identification."""
-    fft_signals = np.zeros(extracted_signals.shape[:2], dtype=ld.ExtractedSignal)
+def get_fft_signals(extracted_signals):
+    """Get the FFTs of extracted signals."""
+    fft_signals = np.zeros(extracted_signals.shape, dtype=ld.ExtractedSignal)
 
-    for id_signal, signal in enumerate(extracted_signals.flat):
-        fft_pitch = fftshift(fft(signal.pitch))
-        ampl_pitch = np.sqrt(fft_pitch.real**2 + fft_pitch.imag**2)[len(fft_pitch)//2:]
-        fft_plunge = fftshift(fft(signal.plunge))
-        ampl_plunge = np.sqrt(fft_plunge.real**2 + fft_plunge.imag**2)[len(fft_plunge)//2:]
-        f_sample = fftshift(fftfreq(signal.var.shape[-1]))*ld.SAMPLING_FREQ_HZ
-        f_sample = f_sample[len(f_sample)//2:]
-        (id_run, id_bound) = np.unravel_index(id_signal, fft_signals.shape)
-        fft_signals[id_run][id_bound] = ld.ExtractedSignal(
-            id       = id_bound,
-            id_run   = id_run,
-            airspeed = signal.airspeed,
-            pitch    = ampl_pitch,
-            plunge   = ampl_plunge,
-            var      = f_sample
-        )
+    for i_run, signal_run in enumerate(extracted_signals):
+        for i_signal, signal in enumerate(signal_run):
+            fft_pitch = fftshift(fft(signal.pitch))
+            ampl_pitch = np.sqrt(fft_pitch.real**2 + fft_pitch.imag**2)[len(fft_pitch)//2:]
+            fft_plunge = fftshift(fft(signal.plunge))
+            ampl_plunge = np.sqrt(fft_plunge.real**2 + fft_plunge.imag**2)[len(fft_plunge)//2:]
+            f_sample = fftshift(fftfreq(signal.var.shape[-1]))*ld.SAMPLING_FREQ_HZ
+            f_sample = f_sample[len(f_sample)//2:]
+            fft_signals[i_run][i_signal] = ld.ExtractedSignal(
+                id       = i_signal,
+                id_run   = i_run,
+                airspeed = signal.airspeed,
+                pitch    = ampl_pitch,
+                plunge   = ampl_plunge,
+                var      = f_sample
+            )
 
     return fft_signals
 
 
 class HppmResult(NamedTuple):
+    """Computed quantities from the half-power point method."""
     fn_idx: int
     fn: float
     f1: float
@@ -53,11 +54,11 @@ def half_power_point_method(fft_sample: np.ndarray, freq_sample: np.ndarray) -> 
     halfpeaks_pitch = peak_widths(fft_sample, [fn_idx], rel_height=1/np.sqrt(2))
     fn = freq_sample[fn_idx]
     f1, f2 = np.interp(
-        [halfpeaks_pitch[2], halfpeaks_pitch[3]],
+        [halfpeaks_pitch[2][0], halfpeaks_pitch[3][0]],
         np.arange(0, len(freq_sample)),
         freq_sample
     )
-    half_power = halfpeaks_pitch[1]
+    half_power = halfpeaks_pitch[1][0]
     damping = (f2 - f1) / (2*fn)
 
     return HppmResult(
@@ -71,30 +72,37 @@ def half_power_point_method(fft_sample: np.ndarray, freq_sample: np.ndarray) -> 
 
 
 class HppmSignal(NamedTuple):
-        fft: ld.ExtractedSignal
-        pitch: HppmResult
-        plunge: HppmResult
+    """FFTs of an ExtractedSignal, with its HPPM computed quantities."""
+    fft: ld.ExtractedSignal
+    pitch: HppmResult
+    plunge: HppmResult
 
 
-def get_hppm_signal(fft_signal: ld.ExtractedSignal) -> HppmSignal:
-    hppm_pitch = half_power_point_method(fft_signal.pitch, fft_signal.var)
-    hppm_plunge = half_power_point_method(fft_signal.plunge, fft_signal.var)
+def get_hppm_signals(fft_signals):
+    """Get the HHPM results of extracted signals."""
+    hppm_signals = np.zeros(fft_signals.shape, dtype=HppmSignal)
 
-    return HppmSignal(
-        fft    = fft_signal,
-        pitch  = hppm_pitch,
-        plunge = hppm_plunge,
-    )
+    for i_run, signal_run in enumerate(fft_signals):
+        for i_signal, signal in enumerate(signal_run):
+            hppm_pitch = half_power_point_method(signal.pitch, signal.var)
+            hppm_plunge = half_power_point_method(signal.plunge, signal.var)
+            hppm_signals[i_run][i_signal] = HppmSignal(
+                fft    = signal,
+                pitch  = hppm_pitch,
+                plunge = hppm_plunge,
+            )
+
+    return hppm_signals
 
 
 def plot_half_power(hppm_signal: HppmSignal, fig=None):
-    """Plot the amplitude FFT of accelerations with HPPM computed quantities."""
+    """Plot the amplitude FFT of accelerations with its HPPM computed quantities."""
 
     fig = plt.figure()
     fig.suptitle((
         "Half-power point method"
-        f" (run: {signal_run[0].id_run}"
-        f" -- airspeed: {signal_run[0].airspeed} m/s)"
+        f" (run: {hppm_signal.fft.id_run}"
+        f" -- airspeed: {hppm_signal.fft.airspeed} m/s)"
     ))
     fig.supxlabel("Frequency (Hz)")
     fig.supylabel("Acceleration FFT amplitude")
@@ -113,25 +121,46 @@ def plot_half_power(hppm_signal: HppmSignal, fig=None):
     fig.show()
 
 
+def extract_freq_damp(hppm_signals):
+    airspeeds = np.zeros(hppm_signals.shape)
+    freq_pitch = np.zeros(hppm_signals.shape)
+    damp_pitch = np.zeros(hppm_signals.shape)
+    freq_plunge = np.zeros(hppm_signals.shape)
+    damp_plunge = np.zeros(hppm_signals.shape)
+
+    for i_run, signal_run in enumerate(hppm_signals):
+        for i_signal, signal in enumerate(signal_run):
+            airspeeds[i_run][i_signal]   = hppm_signals[i_run][i_signal].fft.airspeed
+            freq_pitch[i_run][i_signal]  = hppm_signals[i_run][i_signal].pitch.fn
+            damp_pitch[i_run][i_signal]  = hppm_signals[i_run][i_signal].pitch.damping
+            freq_plunge[i_run][i_signal] = hppm_signals[i_run][i_signal].plunge.fn
+            damp_plunge[i_run][i_signal] = hppm_signals[i_run][i_signal].plunge.damping
+
+    return (airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge)
+
+
+def plot_freq_damp(airspeeds, freq_pitch, damp_pitch, freq_plunge, damp_plunge):
+    fig = plt.figure()
+    fig.suptitle(("Half-power point method"))
+    fig.supxlabel("Wind tunnel speed (m/s)")
+
+    gs = fig.add_gridspec(2, 1, hspace=0.2)
+    (ax_freq, ax_damp) = gs.subplots()
+    ax_freq.set_ylabel("Frequencies (Hz)")
+    ax_damp.set_ylabel("Dampings")
+
+    ax_freq.scatter(airspeeds, freq_pitch, marker="x", label="Pitch")
+    ax_freq.scatter(airspeeds, freq_plunge, marker="+", label="Plunge")
+
+    ax_damp.scatter(airspeeds, damp_pitch, marker="x", label="Pitch")
+    ax_damp.scatter(airspeeds, damp_plunge, marker="+", label="Plunge")
+
+    ax_freq.legend()
+    fig.show()
+
+
 if __name__ == '__main__':
-    extracted_signals = ld.extract_signals(ld.EXTRACT_BOUNDS)
-    fft_signals = compute_fft_signals(extracted_signals)
-
-    # for id_run, signal_run in enumerate(extracted_signals):
-    #     for id_signal, signal in enumerate(signal_run):
-    #         plt.plot(signal.var, signal.plunge)
-    #         plt.title(f"run: {id_run} -- signal: {id_signal}")
-    #     plt.show()
-
-    for signal_run in fft_signals:
-        for signal in signal_run:
-            hppm_signal = get_hppm_signal(signal)
-            print(
-                hppm_signal.pitch.fn,
-                hppm_signal.pitch.f1,
-                hppm_signal.pitch.f2,
-                hppm_signal.pitch.damping
-            )
-
-    # check one freq
-    plot_half_power(get_hppm_signal(fft_signals[1][0]))
+    extracted_signals = ld.get_extracted_signals(ld.EXTRACT_BOUNDS)
+    fft_signals = get_fft_signals(extracted_signals)
+    hppm_signals = get_hppm_signals(fft_signals)
+    plot_freq_damp(*extract_freq_damp(hppm_signals))
