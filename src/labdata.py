@@ -1,5 +1,6 @@
 """Utilities for manipulating the lab data."""
 
+import pathlib
 from typing import NamedTuple
 
 import numpy as np
@@ -14,14 +15,17 @@ plt.rcParams['font.serif'] = ['STIX Two Text'] + plt.rcParams['font.serif']
 plt.rcParams['font.size'] = 11
 plt.rcParams['figure.dpi'] = 200
 
-LAB_DATA = io.loadmat(r"res\DATAG2_v7")["exp_data"][0]
+ROOT_DIR = pathlib.Path(__file__).parent.parent
+FPATH_DATA = ROOT_DIR / "res" / "DATAG2_v7"
+DATA = io.loadmat(str(FPATH_DATA))["exp_data"][0]
+
 SAMPLING_FREQ_HZ = 201.03
 SAMPLING_TSTEP = 1/SAMPLING_FREQ_HZ
 
 
 def get_run(id_run):
     """Extract lab data for the desired airspeed run."""
-    run = LAB_DATA[id_run]
+    run = DATA[id_run]
     pitch = run[0].flatten()
     plunge = run[1].flatten()
     airspeed = run[2].flatten()[0]
@@ -30,9 +34,9 @@ def get_run(id_run):
     return (pitch, plunge, airspeed, n_sample)
 
 
-def plot_raw_acceleration(id):
+def plot_raw_acceleration(id_run):
     """Plot the raw accelerometer data for the desired airspeed run."""
-    (pitch, plunge, airspeed, _) = get_run(id)
+    (pitch, plunge, airspeed, _) = get_run(id_run)
 
     fig = plt.figure()
     fig.supxlabel("Array index")
