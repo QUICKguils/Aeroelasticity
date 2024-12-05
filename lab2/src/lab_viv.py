@@ -11,31 +11,11 @@ from matplotlib import pyplot as plt
 cylinder_diameter           = 125e-3 # [m]
 stifness_flexion_horizontal = 40800 # N/m
 
-
-'''
-data = np.zeros((13))
-for i in range(len(data)):
-    data[i] = pd.read_csv('gr3_0.dat', delim_whitespace=True, header=None)
-data_0 = pd.read_csv('gr3_0.dat', delim_whitespace=True, header=None) # airspeed 0 [m/s]
-data_1 = pd.read_csv('gr3_1.dat', delim_whitespace=True, header=None) # airspeed 6 [m/s]
-data_2 = pd.read_csv('gr3_2.dat', delim_whitespace=True, header=None) # airspeed 9.2 [m/s]
-data_3 = pd.read_csv('gr3_3.dat', delim_whitespace=True, header=None) # airspeed 10.7 [m/s]
-data_4 = pd.read_csv('gr3_4.dat', delim_whitespace=True, header=None) # airspeed 11.9 [m/s]
-data_5 = pd.read_csv('gr3_5.dat', delim_whitespace=True, header=None) # airspeed 13.4 [m/s]
-data_6 = pd.read_csv('gr3_6.dat', delim_whitespace=True, header=None) # airspeed 14.2 [m/s]
-data_7 = pd.read_csv('gr3_7.dat', delim_whitespace=True, header=None) # airspeed 14.9 [m/s]
-data_8 = pd.read_csv('gr3_8.dat', delim_whitespace=True, header=None) # airspeed 16.2 [m/s]
-data_9 = pd.read_csv('gr3_9.dat', delim_whitespace=True, header=None) # airspeed 16.6 [m/s]
-data_10 = pd.read_csv('gr3_10.dat', delim_whitespace=True, header=None) # airspeed 18.8 [m/s]
-data_11 = pd.read_csv('gr3_11.dat', delim_whitespace=True, header=None) # airspeed 21 [m/s]
-data_12 = pd.read_csv('gr3_12.dat', delim_whitespace=True, header=None) # airspeed 23.9 [m/s]
-'''
-
 data_list = []
 
 # Loop charge of .dat files
 for i in range(13):  
-    file_name = f'gr3_{i}.dat'  
+    file_name = f'../data/group3/gr3_{i}.dat'  
     data = pd.read_csv(file_name, delim_whitespace=True, header=None)
     if 'Airspeed' in data.iloc[0, 0]:
         # Supprimer la première ligne
