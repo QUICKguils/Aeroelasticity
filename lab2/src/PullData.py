@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
+import FRF as frf
 import scipy.io
 import os
 import re
+import matplotlib.pyplot as plt
 
 def data_pull_airspeed(prefix, number_data, directory='../data/group3'):
     airspeed_data = {}
@@ -49,3 +51,40 @@ def data_pull_0(data, acquisition_frequency) :
     w_second_shock    = w[idx_second_shock]
     w_third_shock     = w[idx_third_shock]
     return {"First shock": (time_first_shock, w_first_shock), "Second shock": (time_second_shock, w_second_shock), "Third shock": (time_third_shock, w_third_shock)}
+
+def extract_max_amplitude_displacement(data) :
+    keys = list(data.keys())[1:] # pas prendre le 0
+    A = np.zeros(len(keys))
+    for i, U in enumerate(keys):
+        y = data[U]["y"]
+        max_arg = np.argmax(y)
+        A[i] = y[max_arg]
+    return A
+
+def extract_frequency_wake(data, acquisition_frequency) :
+    """
+    Extract frequency of the wake in this case the fct is just use an argmax, like work in this data
+    """
+    keys = list(data.keys())[1:]
+    w = np.zeros(len(keys))
+    for i, U in enumerate(keys):
+        speed_wake = data[U]["w"]
+        t = np.linspace(0, len(speed_wake)/acquisition_frequency, len(speed_wake))
+        w_mag, w_freq = frf.compute_FRF(t, speed_wake)
+        idx = np.argmax(w_mag)
+        w[i] = w_freq[idx]
+    return w
+
+def extract_RMS(data, acquisition_frequency) :
+    keys = list(data.keys())[1:]
+    y_rms = np.zeros(len(keys))
+    for i, U in enumerate(keys):
+        y = data[U]["y"]
+        y_sum = np.sum(y**2)
+        y_rms[i] = np.sqrt( (1/len(y)) * y_sum) 
+    return y_rms
+
+
+
+
+
