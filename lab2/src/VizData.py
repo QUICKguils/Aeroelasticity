@@ -32,34 +32,35 @@ def viz_FRF_0(amplitude, frequency, path="../figures/"):
     plt.plot(frequency, amplitude)
     plt.xlim(min(frequency), max(frequency))
     plt.ylim(min(amplitude), max(amplitude) + 0.05)
-    plt.xticks([0, 10, 20, 22, 30, 40, 50])
+    plt.xticks([0, 5,10, 15, 20, 22, 30, 35,40])
     plt.xlabel(r"Frequency [Hz]", fontsize=17)
     plt.ylabel(r"Magnitude [m]", fontsize=17)
     plt.savefig(path, dpi=150, bbox_inches='tight')
     # plt.show()
     plt.close() 
 
-def viz_freqWake_reduced_velocity(reduced_velocity, mode_wake, freq_structural, strual_number = 0.2):
-    plt.figure(figsize=(10, 5))
+def viz_freqWake_reduced_velocity(reduced_velocity, mode_wake, freq_structural, freq_stuctural_speed,strual_number = 0.2):
+    plt.figure(figsize=(10, 4))
     # Scatter plot
-    plt.scatter(reduced_velocity, mode_wake, color='royalblue', edgecolors='royalblue', facecolors='none', label='Mode Wake')
+    plt.scatter(reduced_velocity, mode_wake, color=color_list[0], edgecolors=color_list[0], facecolors='none', label=r'Vibration frequency')
+    plt.scatter(reduced_velocity, freq_stuctural_speed, color=color_list[1], marker='x',label=r'Vortex shedding frequency')
 
     # Axes labels
     plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$f_{vs}$ [Hz]", fontsize=17)
+    plt.ylabel(r"Frequency [Hz]", fontsize=17)
     
     # Structural frequency horizontal line
-    plt.hlines(freq_structural, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot', label='Structural frequency')
+    plt.hlines(freq_structural, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot')
     
-    # Theoretical lock-in range vertical line
-    plt.vlines(1/strual_number, min(mode_wake) - 3, max(mode_wake) + 3, color='black', linestyle='dashdot')
+    # # Theoretical lock-in range vertical line
+    # plt.vlines(1/strual_number, min(mode_wake) - 3, max(mode_wake) + 3, color='black', linestyle='dashdot')
     
-    # Adding vertical text for the vertical line
-    plt.text(1/strual_number - 0.3, min(mode_wake) +4, 
-             r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
+    # # Adding vertical text for the vertical line
+    # plt.text(1/strual_number + 0.3, min(mode_wake) + 1, 
+    #          r"$\frac{1}{St}$", fontsize=20, color='black', va='center')
     plt.text(0.1, freq_structural + 0.8, 
              r"Structural frequency", fontsize=10, color='black', va='center')
-    
+    plt.legend()
     plt.xticks([0, 2, 4, 5, 6, 8])
     plt.yticks([10, 15, 20, 22, 25, 30, 35])
     plt.xlim(0, max(reduced_velocity) + 0.5)
@@ -70,123 +71,118 @@ def viz_freqWake_reduced_velocity(reduced_velocity, mode_wake, freq_structural, 
     # plt.show()
     plt.close()
 
-def viz_amplitudeDisp_reduced_velocity(reduced_velocity, amplitude, strual_number = 0.2):
+def viz_amplitudeDisp_reduced_velocity(reduced_velocity, amplitude, strual_number = 0.2, diametre_cylindre = 1):
     plt.figure(figsize=(10, 4))
-    plt.scatter(reduced_velocity, amplitude, color='royalblue', edgecolors='royalblue', facecolors='none')
-    plt.xlim(0, max(reduced_velocity) + 0.5)
-    plt.ylim(min(amplitude), max(amplitude) + 0.005)
-        # Theoretical lock-in range vertical line
-    plt.vlines(1/strual_number, min(amplitude) - 3, max(amplitude) + 3, color='black', linestyle='dashdot')
-    
-    # Adding vertical text for the vertical line
-    plt.text(1/strual_number + 0.2, min(amplitude) + 0.0055, 
-            r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
-    plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$A_{max}$ [m]", fontsize=17)
-    plt.xticks([0, 2, 4, 5, 6, 8])
-    plt.yticks([0, 0.005, 0.010, 0.015, 0.020])
-    file_name = f"../figures/gr3/amplitudeDisp_reduced_velocity.pdf"
-    plt.savefig(file_name, dpi=150, bbox_inches='tight')
-    # plt.show()
-    plt.close()
+    if diametre_cylindre == 1:
+        plt.scatter(reduced_velocity, amplitude, color=color_list[0], edgecolors=color_list[0], facecolors='none')
+    else:
+        plt.scatter(reduced_velocity, np.array(amplitude)/diametre_cylindre, color=color_list[0], edgecolors=color_list[0], facecolors='none')
 
-def viz_amplitudeWake_reduced_velocity(reduced_velocity, amplitude, strual_number = 0.2):
-    plt.figure(figsize=(10, 4))
-    plt.scatter(reduced_velocity, amplitude, color='royalblue', edgecolors='royalblue', facecolors='none')
-    plt.xlim(0, max(reduced_velocity) + 0.5)
+    # plt.xlim(0, max(reduced_velocity) + 0.5)
     # plt.ylim(min(amplitude), max(amplitude) + 0.005)
         # Theoretical lock-in range vertical line
-    plt.vlines(1/strual_number, min(amplitude) - 3, max(amplitude) + 3, color='black', linestyle='dashdot')
+    # plt.vlines(1/strual_number, min(amplitude) - 3, max(amplitude) + 3, color='black', linestyle='dashdot')
     
     # Adding vertical text for the vertical line
-    plt.text(1/strual_number + 0.2, min(amplitude) + 0.0055, 
-            r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
+    # plt.text(1/strual_number + 0.2, min(amplitude) + 0.0055, 
+    #         r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
     plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$A_{max}$ [m/s]", fontsize=17)
-    plt.xticks([0, 2, 4, 5, 6, 8])
-    file_name = f"../figures/gr3/amplitudeWake_reduced_velocity.pdf"
-    plt.savefig(file_name, dpi=150, bbox_inches='tight')
+    if diametre_cylindre == 1:
+        
+        plt.ylabel(r"$A_{max}$ [m]", fontsize=17)
+        file_name = f"../figures/gr3/amplitudeDisp_reduced_velocity.pdf"
+        plt.savefig(file_name, dpi=150, bbox_inches='tight')
+    else:
+        plt.ylabel(r"$A_{max}/D$ [-]", fontsize=17)
+        file_name = f"../figures/gr3/amplitudeDisp_reduced_velocity_adimensional.pdf"
+        plt.savefig(file_name, dpi=150, bbox_inches='tight')
+
     # plt.show()
     plt.close()
-
 
 def viz_RMS_reduced_velocity(reduced_velocity, rms_displacement, strual_number = 0.2):
     plt.figure(figsize=(10, 4))
-    plt.scatter(reduced_velocity, rms_displacement*1e3, color='royalblue', edgecolors='royalblue', facecolors='none')
-    plt.xlim(0, max(reduced_velocity) + 0.5)
-    plt.ylim(min(rms_displacement), max(rms_displacement) + 5)
-    plt.xlabel(r"Reduced Velocity $U_r$ [-]", fontsize=17)
+    plt.scatter(reduced_velocity, rms_displacement*1e3, color=color_list[0], edgecolors=color_list[0], facecolors='none')
+    # plt.xlim(0, max(reduced_velocity) + 0.5)
+    # plt.ylim(min(rms_displacement), max(rms_displacement) + 5)
+    plt.xlabel(r"$U_r$ [-]", fontsize=17)
     plt.ylabel(r"RMS displacement [mm]", fontsize=17)
-    plt.xticks([0, 2, 4, 5, 6, 8])
-    plt.yticks([0, 5, 10, 15, 20])
     file_name = f"../figures/gr3/RMS_reduced_velocity.pdf"
     plt.savefig(file_name, dpi=150, bbox_inches='tight')
     # plt.show()
     plt.close()
 
 
-def viz_freqWake_reduced_velocity_with_strual(reduced_velocity, mode_wake, freq_structural, strual_number = 0.2):
+def viz_freqWake_reduced_velocity_with_strual(reduced_velocity, mode_wake, freq_structural, freq_stuctural_speed,strual_number = 0.2, adimentionalise = False):
     plt.figure(figsize=(10, 5))
     # Scatter plot
-    plt.scatter(reduced_velocity, mode_wake, color='royalblue', edgecolors='royalblue', facecolors='none', label='Mode Wake')
+    if adimentionalise :
+        plt.scatter(reduced_velocity, np.array(mode_wake)/freq_structural, color=color_list[0], edgecolors=color_list[0], facecolors='none', label=r'Vibration frequency')
+        plt.scatter(reduced_velocity,  np.array(freq_stuctural_speed)/freq_structural, color=color_list[1], marker='x',label=r'Vortex shedding frequency')
 
-    # Axes labels
-    plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$f_{vs}$ [Hz]", fontsize=17)
-    plt.plot(np.insert(reduced_velocity, 0, 0), np.insert(reduced_velocity, 0, 0)*strual_number*freq_structural, color='black', linestyle='dashdot')
-    # Structural frequency horizontal line
-    plt.hlines(freq_structural, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot', label='Structural frequency')
-    
-    # Theoretical lock-in range vertical line
-    plt.vlines(1/strual_number, min(mode_wake) - 3, max(mode_wake) + 3, color='black', linestyle='dashdot')
-     
-    # Adding vertical text for the vertical line
-    plt.text(1/strual_number - 0.3, min(mode_wake) +4, 
-             r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
-    plt.text(0.1, freq_structural + 0.8, 
-             r"Structural frequency", fontsize=10, color='black', va='center')
-    
-    
-    plt.xticks([0, 2, 4, 5, 6, 8])
-    plt.yticks([10, 15, 20, 22, 25, 30, 35])
-    plt.xlim(0, max(reduced_velocity) + 0.5)
-    plt.ylim(min(mode_wake) - 3, max(mode_wake) + 3)
-    # Save and show the plot
-    file_name = "../figures/gr3/freqWake_reduced_velocityStouhal.pdf"
-    plt.savefig(file_name, dpi=150, bbox_inches='tight')
-    # plt.show()
+        plt.xlabel(r"$U_r$ [-]", fontsize=17)
+        plt.ylabel(r"f/$f_s^0$[Hz]", fontsize=17)
+        plt.plot(
+        np.insert(reduced_velocity, 0, 0),
+        np.insert(reduced_velocity, 0, 0) * strual_number,
+        color=color_list[2],  # Bordeaux
+        linestyle='dashdot',
+        label=r'Strouhal Law'
+        )
+
+        # Structural frequency horizontal line
+        plt.hlines(1, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot')
+        
+        # Theoretical lock-in range vertical line
+        plt.vlines(1/strual_number, (min(mode_wake) - 3)/freq_structural, (max(mode_wake) + 3)/freq_structural, color='black', linestyle='dashdot')
+            
+        plt.text(1/strual_number + 0.3, (min(mode_wake) + 1)/freq_structural, 
+                r"$\frac{1}{St}$", fontsize=20, color='black', va='center')
+        
+        plt.xticks([0, 2, 4, 5, 6, 8])
+        plt.yticks(np.array([10, 15, 20, 22, 25, 30, 35])/freq_structural)
+        plt.xlim(0, max(reduced_velocity) + 0.5)
+        plt.legend()
+        plt.ylim(np.array(min(mode_wake) - 3)/freq_structural, np.array(max(mode_wake) + 3)/freq_structural)
+        # Save and show the plot
+        file_name = "../figures/gr3/freq_strual_adimentional.pdf"
+        plt.savefig(file_name, dpi=150, bbox_inches='tight')
+        # plt.show()
+    else:
+        plt.scatter(reduced_velocity, mode_wake, color=color_list[0], edgecolors=color_list[0], facecolors='none', label=r'Vibration frequency')
+        plt.scatter(reduced_velocity, freq_stuctural_speed, color=color_list[1], marker='x',label=r'Vortex shedding frequency')
+
+        plt.xlabel(r"$U_r$ [-]", fontsize=17)
+        plt.ylabel(r"Frequency [Hz]", fontsize=17)
+        plt.plot(
+        np.insert(reduced_velocity, 0, 0),
+        np.insert(reduced_velocity, 0, 0) * strual_number * freq_structural,
+        color=color_list[2],  # Bordeaux
+        linestyle='dashdot',
+        label=r'Strouhal Law'
+        )
+
+        # Structural frequency horizontal line
+        plt.hlines(freq_structural, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot')
+        
+        # Theoretical lock-in range vertical line
+        plt.vlines(1/strual_number, min(mode_wake) - 3, max(mode_wake) + 3, color='black', linestyle='dashdot')
+            
+        plt.text(1/strual_number + 0.3, min(mode_wake) + 1, 
+                r"$\frac{1}{St}$", fontsize=20, color='black', va='center')
+        
+        plt.xticks([0, 2, 4, 5, 6, 8])
+        plt.yticks([10, 15, 20, 22, 25, 30, 35])
+        plt.xlim(0, max(reduced_velocity) + 0.5)
+        plt.legend()
+        plt.ylim(min(mode_wake) - 3, max(mode_wake) + 3)
+        # Save and show the plot
+        file_name = "../figures/gr3/freqWake_reduced_velocityStouhal.pdf"
+        plt.savefig(file_name, dpi=150, bbox_inches='tight')
+        # plt.show()
+
     plt.close()
 
-def viz_freqWake_reduced_velocity(reduced_velocity, mode_wake, freq_structural, freq_structure_speed, strual_number = 0.2 ):
-    plt.figure(figsize=(10, 5))
-    # Scatter plot
-    plt.scatter(reduced_velocity, mode_wake, color='royalblue', edgecolors='royalblue', facecolors='none', label='Mode Wake')
-    plt.scatter(reduced_velocity, freq_structure_speed, color='red', label='Structural frequency', marker='x')
-    # Axes labels
-    plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$f_{vs}$ [Hz]", fontsize=17)
-    
-    # Structural frequency horizontal line
-    plt.hlines(freq_structural, 0, max(reduced_velocity) + 0.5, color='black', linestyle='dashdot', label='Structural frequency')
-    
-    # Theoretical lock-in range vertical line
-    plt.vlines(1/strual_number, min(mode_wake) - 3, max(mode_wake) + 3, color='black', linestyle='dashdot')
-    
-    # Adding vertical text for the vertical line
-    plt.text(1/strual_number - 0.3, min(mode_wake) +4, 
-             r"Theoretical Lock-in Range", rotation=90, fontsize=9, color='black', va='center')
-    plt.text(0.1, freq_structural + 0.8, 
-             r"Structural frequency", fontsize=10, color='black', va='center')
-    
-    plt.xticks([0, 2, 4, 5, 6, 8])
-    plt.yticks([10, 15, 20, 22, 25, 30, 35])
-    plt.xlim(0, max(reduced_velocity) + 0.5)
-    plt.ylim(min(mode_wake) - 3, max(mode_wake) + 3)
-    # Save and show the plot
-    file_name = "../figures/gr3/freqWake_reduced_velocity.pdf"
-    plt.savefig(file_name, dpi=150, bbox_inches='tight')
-    # plt.show()
-    plt.close()
 
 
 def viz_freqWake_reduced_velocity_damping(different_damp) :
@@ -234,7 +230,7 @@ def viz_freqWake_reduced_velocity_amplitude(different_damp) :
     # plt.scatter(different_damp["Common 1"]["reduce_velocity"], different_damp["Common 1"]["amplitude"], label="Common 1", edgecolors=color_list[0], facecolors='none')
     # plt.scatter(different_damp["Common 2"]["reduce_velocity"], different_damp["Common 2"]["amplitude"], label=f" = {different_damp[key]['damp']*100:.2f} [%]", edgecolors=color_list[1], facecolors='none')
     plt.xlabel(r"$U_r$ [-]", fontsize=17)
-    plt.ylabel(r"$f_{vs}$ [Hz]", fontsize=17)
+    plt.ylabel(r"Amplitude [mm]", fontsize=17)
     plt.legend()
     path = "../figures/freqWake_reduced_velocity_damping_amplitude.pdf"
     # plt.show()

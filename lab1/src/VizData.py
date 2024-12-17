@@ -34,7 +34,7 @@ def viz_speed_stabWithenvelope(speed_stab) :
     plt.hlines(0, 0, 20, color="#800020", linestyles="dashdot", label=r"Flutter Boundary")
     plt.xlabel(r"Speed [m/s]")
     plt.legend()
-    plt.ylabel(r"Stability criteria [-]")
+    plt.ylabel(r"Stability criteria [$s^{-1}$]")
     plt.xlim(0, 19)
     plt.ylim(np.min(y) - 0.1, np.max(y) + 0.1)
 
