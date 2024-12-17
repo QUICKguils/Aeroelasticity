@@ -138,9 +138,6 @@ def viz_freqWake_reduced_velocity_with_strual(reduced_velocity, mode_wake, freq_
             
         plt.text(1/strual_number + 0.3, (min(mode_wake) + 1)/freq_structural, 
                 r"$\frac{1}{St}$", fontsize=20, color='black', va='center')
-        
-        plt.xticks([0, 2, 4, 5, 6, 8])
-        plt.yticks(np.array([10, 15, 20, 22, 25, 30, 35])/freq_structural)
         plt.xlim(0, max(reduced_velocity) + 0.5)
         plt.legend()
         plt.ylim(np.array(min(mode_wake) - 3)/freq_structural, np.array(max(mode_wake) + 3)/freq_structural)
